@@ -1,0 +1,920 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Skins Catalog — Murderers VS Sheriffs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Exo+2:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #080c14;
+      --surface: rgba(255,255,255,.042);
+      --surface-hover: rgba(255,255,255,.072);
+      --stroke: rgba(255,255,255,.09);
+      --stroke-hover: rgba(255,255,255,.2);
+      --text: #dde6ff;
+      --muted: rgba(221,230,255,.55);
+      --radius: 16px;
+      --card-radius: 14px;
+      --thumb-h: 220px;
+
+      --c-common:    #9bacc8;
+      --c-uncommon:  #27f1d1;
+      --c-rare:      #4fa3ff;
+      --c-legendary: #ffd65c;
+      --c-mythic:    #ff5caa;
+      --c-ancient:   #b67cff;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+
+    body {
+      font-family: 'Exo 2', ui-sans-serif, system-ui, sans-serif;
+      background:
+        radial-gradient(ellipse 140% 80% at 0% -10%, rgba(124,58,255,.22) 0%, transparent 55%),
+        radial-gradient(ellipse 100% 70% at 100% 10%,  rgba(39,241,209,.14) 0%, transparent 55%),
+        radial-gradient(ellipse 80%  60% at 50% 110%,  rgba(255,92,170,.10) 0%, transparent 55%),
+        var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ─── Noise grain overlay ─── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+      background-size: 160px 160px;
+      opacity: .6;
+    }
+
+    .wrap {
+      position: relative; z-index: 1;
+      max-width: 1380px;
+      margin: 0 auto;
+      padding: 32px 20px 60px;
+    }
+
+    /* ─── Header ─── */
+    header {
+      margin-bottom: 28px;
+    }
+    .header-inner {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+    h1 {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: clamp(28px, 4vw, 52px);
+      font-weight: 700;
+      letter-spacing: 1px;
+      line-height: 1;
+      background: linear-gradient(135deg, #fff 0%, rgba(178,150,255,1) 60%, rgba(39,241,209,1) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .sub {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+      max-width: 64ch;
+    }
+
+    /* ─── Rarity Pills ─── */
+    .pillrow {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 6px 12px;
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,.04);
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: .3px;
+    }
+    .dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* ─── Controls Panel ─── */
+    .panel {
+      border: 1px solid var(--stroke);
+      background: linear-gradient(160deg, rgba(255,255,255,.065), rgba(255,255,255,.025));
+      border-radius: var(--radius);
+      backdrop-filter: blur(12px);
+    }
+
+    .controls {
+      padding: 16px;
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr auto;
+      gap: 12px;
+      align-items: end;
+    }
+    @media (max-width: 1000px) {
+      .controls { grid-template-columns: 1fr 1fr; }
+      .controls .ctrl-right { grid-column: 1/-1; justify-content: flex-end; }
+    }
+    @media (max-width: 520px) {
+      .controls { grid-template-columns: 1fr; }
+    }
+
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    label { font-size: 11px; font-weight: 600; letter-spacing: .6px; text-transform: uppercase; color: var(--muted); }
+
+    input[type="search"],
+    select {
+      width: 100%;
+      padding: 11px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--stroke);
+      background: rgba(8,12,20,.7);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 14px;
+      outline: none;
+      transition: border-color .2s;
+    }
+    input[type="search"]:focus,
+    select:focus { border-color: rgba(124,92,255,.6); }
+    input[type="search"]::placeholder { color: rgba(221,230,255,.3); }
+    select option { background: #0f1523; }
+
+    .ctrl-right { display: flex; gap: 8px; align-items: flex-end; }
+
+    button {
+      padding: 11px 18px;
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,.055);
+      color: var(--text);
+      border-radius: 10px;
+      cursor: pointer;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: .4px;
+      transition: background .18s, border-color .18s, transform .08s;
+      white-space: nowrap;
+    }
+    button:hover { background: rgba(255,255,255,.09); border-color: rgba(255,255,255,.2); }
+    button:active { transform: translateY(1px); }
+
+    /* ─── Stats ─── */
+    .stats-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin: 16px 0;
+    }
+    .stat {
+      flex: 1;
+      min-width: 130px;
+      padding: 14px 16px;
+      border: 1px solid var(--stroke);
+      border-radius: 12px;
+      background: rgba(255,255,255,.035);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .stat .k { font-size: 11px; font-weight: 600; letter-spacing: .6px; text-transform: uppercase; color: var(--muted); }
+    .stat .v { font-family: 'Rajdhani', sans-serif; font-size: 24px; font-weight: 700; letter-spacing: .5px; }
+
+    /* ─── Grid ─── */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    /* ─── Card ─── */
+    .card {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid var(--stroke);
+      border-radius: var(--card-radius);
+      background: rgba(255,255,255,.035);
+      overflow: hidden;
+      transition: transform .15s ease, border-color .2s, box-shadow .2s;
+    }
+    .card:hover {
+      transform: translateY(-3px);
+      border-color: var(--rarity-color, rgba(255,255,255,.2));
+      box-shadow: 0 0 22px -4px var(--rarity-glow, rgba(124,92,255,.3));
+    }
+
+    /* Rarity accent stripe */
+    .rarity-stripe {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: var(--rarity-color, rgba(255,255,255,.2));
+      opacity: .85;
+    }
+
+    /* Rarity corner glow */
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 120px; height: 120px;
+      background: radial-gradient(circle at 0 0, var(--rarity-color, rgba(255,255,255,.05)) 0%, transparent 65%);
+      opacity: .25;
+      pointer-events: none;
+      border-radius: 0 0 100% 0;
+    }
+
+    /* ─── Thumbnail ─── */
+    .thumb {
+      position: relative;
+      height: var(--thumb-h);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      background:
+        radial-gradient(circle at 50% 100%, rgba(0,0,0,.3) 0%, transparent 65%),
+        rgba(0,0,0,.18);
+      border-bottom: 1px solid var(--stroke);
+      overflow: hidden;
+    }
+
+    /* Subtle thumb bg glow */
+    .thumb::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 80% 50% at 50% 30%, var(--rarity-color, rgba(255,255,255,.05)) 0%, transparent 70%);
+      opacity: .18;
+      pointer-events: none;
+    }
+
+    .thumb img {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      object-position: center center;
+      filter: drop-shadow(0 8px 24px rgba(0,0,0,.55));
+      transition: transform .25s ease, filter .25s ease;
+    }
+    .card:hover .thumb img {
+      transform: scale(1.06) translateY(-3px);
+      filter: drop-shadow(0 14px 30px rgba(0,0,0,.6)) drop-shadow(0 0 16px var(--rarity-color, rgba(255,255,255,.1)));
+    }
+
+    .fallback {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      height: 100%;
+      border: 1px dashed rgba(255,255,255,.18);
+      border-radius: 10px;
+      color: var(--muted);
+      font-size: 12px;
+      text-align: center;
+      padding: 12px;
+    }
+    .fallback .fallback-icon { font-size: 28px; opacity: .5; }
+
+    /* ─── Card Body ─── */
+    .body {
+      padding: 14px 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex: 1;
+    }
+
+    .name {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 1.2;
+      letter-spacing: .3px;
+    }
+
+    .meta {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .tag {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .3px;
+      padding: 4px 9px;
+      border-radius: 999px;
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,.04);
+      color: var(--muted);
+    }
+    .tag.rarity-tag {
+      border-color: var(--rarity-color);
+      color: var(--rarity-color);
+      background: rgba(0,0,0,.2);
+    }
+    .tag.key-tag {
+      font-family: 'Courier New', monospace;
+      font-size: 10px;
+      opacity: .65;
+    }
+
+    /* ─── Value ─── */
+    .value {
+      margin-top: auto;
+      padding-top: 10px;
+      border-top: 1px solid var(--stroke);
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .value-left .label { font-size: 10px; font-weight: 600; letter-spacing: .6px; text-transform: uppercase; color: var(--muted); }
+    .value-left .price {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      line-height: 1;
+      color: var(--rarity-color, var(--text));
+    }
+    .value-right { font-size: 10px; color: rgba(221,230,255,.3); }
+
+    /* ─── Empty state ─── */
+    .empty {
+      grid-column: 1/-1;
+      text-align: center;
+      padding: 80px 20px;
+      color: var(--muted);
+      font-size: 15px;
+    }
+    .empty-icon { font-size: 48px; margin-bottom: 12px; opacity: .4; }
+
+    /* ─── Footer ─── */
+    footer {
+      margin-top: 24px;
+      padding-top: 16px;
+      border-top: 1px solid var(--stroke);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: space-between;
+      align-items: center;
+      color: rgba(221,230,255,.35);
+      font-size: 12px;
+    }
+    code.inline {
+      font-family: 'Courier New', monospace;
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,.1);
+      background: rgba(255,255,255,.04);
+    }
+
+    /* Dense mode */
+    .dense .thumb { height: 130px !important; padding: 10px; }
+    .dense .grid { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; }
+    .dense .name { font-size: 13px; }
+    .dense .body { padding: 10px 10px 12px; gap: 7px; }
+    .dense .value-left .price { font-size: 18px; }
+    .dense .tag { font-size: 10px; padding: 3px 7px; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Header -->
+  <header>
+    <div class="header-inner">
+      <div>
+        <h1>Skins Catalog</h1>
+        <p class="sub">
+          Skin values for <b>Murderers VS Sheriffs</b> — browse, search, filter and sort every skin by rarity and value.
+        </p>
+        <div class="pillrow" id="rarityLegend"></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Controls -->
+  <div class="panel">
+    <div class="controls">
+      <div class="field">
+        <label for="q">🔍 Search (name / type / rarity / key)</label>
+        <input id="q" type="search" placeholder="Abyssal, Knife, Mythic, Legendary…" />
+      </div>
+      <div class="field">
+        <label for="type">Type</label>
+        <select id="type">
+          <option value="all">All</option>
+          <option value="Knife">Knife</option>
+          <option value="Gun">Gun</option>
+          <option value="Effect">Effect</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="rarity">Rarity</label>
+        <select id="rarity">
+          <option value="all">All</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="sort">Sort</label>
+        <select id="sort">
+          <option value="value_desc">Value ↓</option>
+          <option value="value_asc">Value ↑</option>
+          <option value="name_asc">Name A→Z</option>
+          <option value="name_desc">Name Z→A</option>
+          <option value="type_asc">Type A→Z</option>
+        </select>
+      </div>
+      <div class="ctrl-right">
+        <button id="reset">Reset</button>
+        <button id="toggleDense">Compact</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat"><div class="k">Shown</div><div class="v" id="shownCount">0</div></div>
+    <div class="stat"><div class="k">Total</div><div class="v" id="totalCount">0</div></div>
+    <div class="stat"><div class="k">Total value</div><div class="v" id="sumValue">0</div></div>
+    <div class="stat"><div class="k">Average value</div><div class="v" id="avgValue">0</div></div>
+  </div>
+
+  <!-- Grid -->
+  <div class="grid" id="grid"></div>
+
+  <footer>
+    <div>Made by <a href="https://www.roblox.com/users/1461889257/profile" target="_blank" style="color:var(--c-ancient);text-decoration:none;font-weight:700">Armancwer1</a> · Roblox profile</div>
+    <div>Discord: <span style="color:var(--c-mythic);font-weight:700">trollxyra</span></div>
+  </footer>
+
+</div>
+
+<script>
+  const RARITY_VALUE = { Common:10, Uncommon:25, Rare:60, Legendary:150, Mythic:400, Ancient:900 };
+  const RARITY_COLOR = {
+    Common:    'rgba(155,172,200,.85)',
+    Uncommon:  'rgba(39,241,209,.9)',
+    Rare:      'rgba(79,163,255,.9)',
+    Legendary: 'rgba(255,214,92,.9)',
+    Mythic:    'rgba(255,92,170,.9)',
+    Ancient:   'rgba(182,124,255,.95)'
+  };
+  const RARITY_GLOW = {
+    Common:    'rgba(155,172,200,.25)',
+    Uncommon:  'rgba(39,241,209,.3)',
+    Rare:      'rgba(79,163,255,.3)',
+    Legendary: 'rgba(255,214,92,.3)',
+    Mythic:    'rgba(255,92,170,.3)',
+    Ancient:   'rgba(182,124,255,.35)'
+  };
+  const THUMB_SIZE = '420x420';
+  const THUMB_FORMAT = 'Png';
+  const THUMB_CIRCULAR = 'false';
+
+  const ITEMS = [
+    // ── KNIVES ──────────────────────────────────────────────────────────────
+    {key:"DefaultKnife",      ItemName:"Default Knife",            Image:"http://www.roblox.com/asset/?id=584555920", ItemType:"Knife", Rarity:"Common"},
+    {key:"AmethystEdge",      ItemName:"Amethyst Edge",            Image:"rbxassetid://120950636773668",              ItemType:"Knife", Rarity:"Ancient"},
+    {key:"DemonspireSword",   ItemName:"Demonspire",               Image:"rbxassetid://100496566959603",              ItemType:"Knife", Rarity:"Ancient"},
+    {key:"Ghoulshard",        ItemName:"Ghoulshard",               Image:"rbxassetid://118682692173545",              ItemType:"Knife", Rarity:"Mythic"},
+    {key:"IceAxe",            ItemName:"Ice Axe",                  Image:"rbxassetid://104368213505092",              ItemType:"Knife", Rarity:"Mythic"},
+    {key:"IceSword",          ItemName:"Ice Sword",                Image:"rbxassetid://90960994928459",               ItemType:"Knife", Rarity:"Mythic"},
+    {key:"EagleEyes",         ItemName:"EagleEyes",                Image:"rbxassetid://77126614690645",               ItemType:"Knife", Rarity:"Ancient"},
+    {key:"MidnightKatana",    ItemName:"Midnight Katana",          Image:"rbxassetid://116693692581695",              ItemType:"Knife", Rarity:"Mythic"},
+    {key:"DarkScythe",        ItemName:"Dark Scythe",              Image:"rbxassetid://133209644537171",              ItemType:"Knife", Rarity:"Mythic"},
+    {key:"CortexCandy",       ItemName:"Cortex Candy",             Image:"rbxassetid://133280740712331",              ItemType:"Knife", Rarity:"Common"},
+    {key:"BooBreaker",        ItemName:"Boo Breaker",              Image:"rbxassetid://131866595747706",              ItemType:"Knife", Rarity:"Common"},
+    {key:"CobwebCutter",      ItemName:"Cobweb Cutter",            Image:"rbxassetid://119557918954664",              ItemType:"Knife", Rarity:"Common"},
+    {key:"RestInPieces",      ItemName:"Rest in Pieces",           Image:"rbxassetid://103760443268322",              ItemType:"Knife", Rarity:"Ancient"},
+    {key:"BlueSnow",          ItemName:"Blue Snow",                Image:"rbxassetid://94870478096869",               ItemType:"Knife", Rarity:"Uncommon"},
+    {key:"ChristmasTree",     ItemName:"Christmas Tree",           Image:"rbxassetid://132681435524687",              ItemType:"Knife", Rarity:"Uncommon"},
+    {key:"CubicSweater",      ItemName:"Cubic Sweater",            Image:"rbxassetid://86893657177979",               ItemType:"Knife", Rarity:"Uncommon"},
+    {key:"Navidad",           ItemName:"Navidad",                  Image:"rbxassetid://79938333610553",               ItemType:"Knife", Rarity:"Legendary"},
+    {key:"Ornament",          ItemName:"Ornament",                 Image:"rbxassetid://73541946127182",               ItemType:"Knife", Rarity:"Uncommon"},
+    {key:"RedDot",            ItemName:"Red Dot",                  Image:"rbxassetid://138989564725200",              ItemType:"Knife", Rarity:"Uncommon"},
+    {key:"ShootingStar",      ItemName:"Shooting Star",            Image:"rbxassetid://119147010387101",              ItemType:"Knife", Rarity:"Uncommon"},
+    {key:"SweetMadness",      ItemName:"Sweet Madness",            Image:"rbxassetid://140588907821860",              ItemType:"Knife", Rarity:"Mythic"},
+    {key:"ChristmasEdge",     ItemName:"Christmas Edge",           Image:"rbxassetid://81293593588445",               ItemType:"Knife", Rarity:"Mythic"},
+    {key:"SantasBlade",       ItemName:"Santa's Blade",            Image:"rbxassetid://132055906814369",              ItemType:"Knife", Rarity:"Ancient"},
+    {key:"RosesAreRed",       ItemName:"Roses Are Red",            Image:"rbxassetid://80509197077748",               ItemType:"Knife", Rarity:"Legendary"},
+    {key:"LoveLetter",        ItemName:"Love Letter",              Image:"rbxassetid://118920726604773",              ItemType:"Knife", Rarity:"Mythic"},
+    {key:"DevotedPassion",    ItemName:"Devoted Passion",          Image:"rbxassetid://70935009190165",               ItemType:"Knife", Rarity:"Uncommon"},
+    {key:"BrokenHeart",       ItemName:"Broken Heart",             Image:"rbxassetid://122891894979116",              ItemType:"Knife", Rarity:"Ancient"},
+    {key:"CupidKarambit",     ItemName:"Cupid Karambit",           Image:"rbxassetid://136535085232296",              ItemType:"Knife", Rarity:"Ancient"},
+    {key:"TheFallen",         ItemName:"The Fallen",               Image:"rbxassetid://127421118873088",              ItemType:"Knife", Rarity:"Mythic"},
+    {key:"BatWingScythe",     ItemName:"BatWing Scythe",           Image:"rbxassetid://85407345448993",               ItemType:"Knife", Rarity:"Mythic"},
+    {key:"Demon",             ItemName:"Demon",                    Image:"rbxassetid://18504112947",                  ItemType:"Knife", Rarity:"Mythic"},
+    {key:"Classic_Gold",      ItemName:"Gold Knife",               Image:"rbxassetid://18504128341",                  ItemType:"Knife", Rarity:"Mythic"},
+    {key:"FireSword",         ItemName:"Fire Sword",               Image:"rbxassetid://18654723923",                  ItemType:"Knife", Rarity:"Mythic"},
+    {key:"CosmicSword",       ItemName:"Cosmic Sword",             Image:"rbxassetid://18667489594",                  ItemType:"Knife", Rarity:"Ancient"},
+    {key:"TitanSword",        ItemName:"Titan Sword",              Image:"rbxassetid://18667460945",                  ItemType:"Knife", Rarity:"Mythic"},
+    {key:"JapanDragonScythe", ItemName:"Japan Dragon Scythe",      Image:"rbxassetid://18654725125",                  ItemType:"Knife", Rarity:"Mythic"},
+    {key:"WindSword",         ItemName:"Wind Sword",               Image:"rbxassetid://18668352561",                  ItemType:"Knife", Rarity:"Mythic"},
+    {key:"DemonicSword",      ItemName:"Demonic Sword",            Image:"rbxassetid://18668352977",                  ItemType:"Knife", Rarity:"Mythic"},
+    {key:"DoubleSidedAxe",    ItemName:"Double Sided Axe",         Image:"rbxassetid://18667460648",                  ItemType:"Knife", Rarity:"Common"},
+    {key:"JapanDragonBigHammer",ItemName:"Japan Dragon Big Hammer",Image:"rbxassetid://18668354682",                  ItemType:"Knife", Rarity:"Mythic"},
+    {key:"Kanabo",            ItemName:"Kanabo",                   Image:"rbxassetid://18654721202",                  ItemType:"Knife", Rarity:"Common"},
+    {key:"DragonFlameBlade",  ItemName:"Dragon Flame Blade",       Image:"rbxassetid://18654776798",                  ItemType:"Knife", Rarity:"Mythic"},
+    {key:"PumpkinAxe",        ItemName:"Pumpkin Axe",              Image:"rbxassetid://80194583787928",               ItemType:"Knife", Rarity:"Mythic"},
+    {key:"ZombieAxe",         ItemName:"Zombie Axe",               Image:"rbxassetid://83505067738786",               ItemType:"Knife", Rarity:"Mythic"},
+    {key:"RainbowSword",      ItemName:"Rainbow Sword",            Image:"rbxassetid://18667488393",                  ItemType:"Knife", Rarity:"Mythic"},
+    {key:"Pan",               ItemName:"Pan",                      Image:"rbxassetid://18504118790",                  ItemType:"Knife", Rarity:"Legendary"},
+    {key:"PumpkinScythe",     ItemName:"Pumpkin Scythe",           Image:"rbxassetid://74376045848871",               ItemType:"Knife", Rarity:"Legendary"},
+    {key:"SharkKnife",        ItemName:"Shark Knife",              Image:"rbxassetid://18504122399",                  ItemType:"Knife", Rarity:"Rare"},
+    {key:"CurveSword",        ItemName:"Curve Sword",              Image:"rbxassetid://18519959621",                  ItemType:"Knife", Rarity:"Rare"},
+    {key:"Pickaxe",           ItemName:"Pickaxe",                  Image:"rbxassetid://18504119048",                  ItemType:"Knife", Rarity:"Rare"},
+    {key:"SeaSword",          ItemName:"Sea Sword",                Image:"rbxassetid://18504121807",                  ItemType:"Knife", Rarity:"Rare"},
+    {key:"SawBat",            ItemName:"Saw Bat",                  Image:"rbxassetid://18504120882",                  ItemType:"Knife", Rarity:"Rare"},
+    {key:"BasicSai",          ItemName:"Basic Sai",                Image:"rbxassetid://18654727371",                  ItemType:"Knife", Rarity:"Rare"},
+    {key:"DragonSword",       ItemName:"Dragon Sword",             Image:"rbxassetid://18654724816",                  ItemType:"Knife", Rarity:"Ancient"},
+    {key:"AbyssalSword",      ItemName:"Abyssal Sword",            Image:"rbxassetid://112731959376868",              ItemType:"Knife", Rarity:"Ancient"},
+    {key:"SolarbiteSword",    ItemName:"Solarbite Sword",          Image:"rbxassetid://76314113425738",               ItemType:"Knife", Rarity:"Ancient"},
+    {key:"TidebreakerSword",  ItemName:"Tidebreaker Sword",        Image:"rbxassetid://78409926955626",               ItemType:"Knife", Rarity:"Ancient"},
+    {key:"Umbrella",          ItemName:"Umbrella",                 Image:"rbxassetid://18504116843",                  ItemType:"Knife", Rarity:"Common"},
+    {key:"FlySwatter",        ItemName:"Fly Swatter",              Image:"rbxassetid://18504115342",                  ItemType:"Knife", Rarity:"Common"},
+    {key:"Sickle",            ItemName:"Sickle",                   Image:"rbxassetid://18504123117",                  ItemType:"Knife", Rarity:"Common"},
+    {key:"Katana",            ItemName:"Katana",                   Image:"rbxassetid://18504117691",                  ItemType:"Knife", Rarity:"Common"},
+    {key:"AnimeSword",        ItemName:"Anime Sword",              Image:"rbxassetid://77064510798232",               ItemType:"Knife", Rarity:"Common"},
+    {key:"Dagger",            ItemName:"Dagger",                   Image:"rbxassetid://91135327604364",               ItemType:"Knife", Rarity:"Common"},
+    {key:"WitchScythe",       ItemName:"Witch Scythe",             Image:"rbxassetid://75901551882573",               ItemType:"Knife", Rarity:"Common"},
+    {key:"PumpkinDagger",     ItemName:"Pumpkin Dagger",           Image:"rbxassetid://93897358316776",               ItemType:"Knife", Rarity:"Common"},
+    {key:"PumpkinCrow",       ItemName:"Pumpkin Crow",             Image:"rbxassetid://77439472819806",               ItemType:"Knife", Rarity:"Common"},
+    {key:"Mace",              ItemName:"Mace",                     Image:"rbxassetid://99542015790587",               ItemType:"Knife", Rarity:"Common"},
+    {key:"HauntedSword",      ItemName:"Haunted Sword",            Image:"rbxassetid://86827992344280",               ItemType:"Knife", Rarity:"Common"},
+    {key:"HammerSpike",       ItemName:"Hammer Spike",             Image:"rbxassetid://93590300603322",               ItemType:"Knife", Rarity:"Common"},
+    {key:"Plunger",           ItemName:"Plunger",                  Image:"rbxassetid://83746945927024",               ItemType:"Knife", Rarity:"Common"},
+    {key:"Axe",               ItemName:"Axe",                      Image:"rbxassetid://75668100932588",               ItemType:"Knife", Rarity:"Common"},
+    {key:"RubberChicken",     ItemName:"Rubber Chicken",           Image:"rbxassetid://85505692473469",               ItemType:"Knife", Rarity:"Common"},
+    {key:"SunKnife",          ItemName:"Sun Knife",                Image:"rbxassetid://81124043921622",               ItemType:"Knife", Rarity:"Common"},
+    {key:"DeadmanShovel",     ItemName:"Deadman Shovel",           Image:"rbxassetid://90889114413179",               ItemType:"Knife", Rarity:"Mythic"},
+    {key:"ZombieHand",        ItemName:"Zombie Hand",              Image:"rbxassetid://71424299658817",               ItemType:"Knife", Rarity:"Mythic"},
+
+    // ── GUNS ────────────────────────────────────────────────────────────────
+    {key:"DefaultGun",           ItemName:"Default Gun",            Image:"http://www.roblox.com/asset/?id=197518111", ItemType:"Gun", Rarity:"Common"},
+    {key:"PumpkinPopper",        ItemName:"Pumpkin Popper",         Image:"rbxassetid://124709578186118",              ItemType:"Gun", Rarity:"Rare"},
+    {key:"PhantomGreen",         ItemName:"Phantom Green",          Image:"rbxassetid://87783288813248",               ItemType:"Gun", Rarity:"Legendary"},
+    {key:"WindSpirits",          ItemName:"Wind Spirits",           Image:"rbxassetid://134896947058014",              ItemType:"Gun", Rarity:"Uncommon"},
+    {key:"NightWeaver",          ItemName:"Night Weaver",           Image:"rbxassetid://121362564666545",              ItemType:"Gun", Rarity:"Legendary"},
+    {key:"Ghoulfire",            ItemName:"Ghoulfire",              Image:"rbxassetid://91749811015033",               ItemType:"Gun", Rarity:"Mythic"},
+    {key:"ArachnidArbalest",     ItemName:"Arachnid Arbalest",      Image:"rbxassetid://97393679828956",               ItemType:"Gun", Rarity:"Ancient"},
+    {key:"IceSniper",            ItemName:"Ice Sniper",             Image:"rbxassetid://122594000417695",              ItemType:"Gun", Rarity:"Mythic"},
+    {key:"ConfettiShotgun",      ItemName:"Confetti Shotgun",       Image:"rbxassetid://105772287901266",              ItemType:"Gun", Rarity:"Mythic"},
+    {key:"FireworkPistol",       ItemName:"Firework Pistol",        Image:"rbxassetid://93390265037267",               ItemType:"Gun", Rarity:"Mythic"},
+    {key:"SkyForgeCrossbow",     ItemName:"Sky Forge Crossbow",     Image:"rbxassetid://114793453194576",              ItemType:"Gun", Rarity:"Mythic"},
+    {key:"ChristmasBall",        ItemName:"Christmas Ball",         Image:"rbxassetid://92645458910978",               ItemType:"Gun", Rarity:"Rare"},
+    {key:"Whool",                ItemName:"Whool",                  Image:"rbxassetid://78455343539382",               ItemType:"Gun", Rarity:"Rare"},
+    {key:"GiftWrap",             ItemName:"Gift Wrap",              Image:"rbxassetid://129737816883047",              ItemType:"Gun", Rarity:"Rare"},
+    {key:"GoldNight",            ItemName:"Gold Night",             Image:"rbxassetid://123043138972493",              ItemType:"Gun", Rarity:"Rare"},
+    {key:"MidnightBlue",         ItemName:"Midnight Blue",          Image:"rbxassetid://128624423716304",              ItemType:"Gun", Rarity:"Rare"},
+    {key:"SugarRush",            ItemName:"Sugar Rush",             Image:"rbxassetid://129188226906521",              ItemType:"Gun", Rarity:"Rare"},
+    {key:"TreeWrap",             ItemName:"Tree Wrap",              Image:"rbxassetid://125437563977165",              ItemType:"Gun", Rarity:"Rare"},
+    {key:"SnowGlobe",            ItemName:"Snow Globe",             Image:"rbxassetid://139754109285232",              ItemType:"Gun", Rarity:"Mythic"},
+    {key:"PineGun",              ItemName:"Pine Gun",               Image:"rbxassetid://126806712694003",              ItemType:"Gun", Rarity:"Ancient"},
+    {key:"FlatLine",             ItemName:"Flat Line",              Image:"rbxassetid://129141431469754",              ItemType:"Gun", Rarity:"Legendary"},
+    {key:"4MyValentine",         ItemName:"4 My Valentine",         Image:"rbxassetid://133925974783265",              ItemType:"Gun", Rarity:"Rare"},
+    {key:"Sweetheart",           ItemName:"Sweetheart",             Image:"rbxassetid://78117826469703",               ItemType:"Gun", Rarity:"Uncommon"},
+    {key:"LoveBazooka",          ItemName:"Love Bazooka",           Image:"rbxassetid://123854980565743",              ItemType:"Gun", Rarity:"Ancient"},
+    {key:"EternalBow",           ItemName:"Eternal Bow",            Image:"rbxassetid://131803758926944",              ItemType:"Gun", Rarity:"Ancient"},
+    {key:"MadLove",              ItemName:"Mad Love",               Image:"rbxassetid://114235536155189",              ItemType:"Gun", Rarity:"Ancient"},
+    {key:"GoldenEagle",          ItemName:"Golden Eagle",           Image:"rbxassetid://88951725007954",               ItemType:"Gun", Rarity:"Ancient"},
+    {key:"RedHyperLaser",        ItemName:"Red Hyper Laser",        Image:"rbxassetid://133942700524796",              ItemType:"Gun", Rarity:"Mythic"},
+    {key:"WW2Gun",               ItemName:"WW2 Gun",                Image:"rbxassetid://18504127183",                  ItemType:"Gun", Rarity:"Legendary"},
+    {key:"AssaultGun",           ItemName:"Assault Gun",            Image:"rbxassetid://18504111814",                  ItemType:"Gun", Rarity:"Legendary"},
+    {key:"CosmicSniper",         ItemName:"Cosmic Sniper",          Image:"rbxassetid://18667488745",                  ItemType:"Gun", Rarity:"Ancient"},
+    {key:"CosmicHandgun",        ItemName:"Cosmic Handgun",         Image:"rbxassetid://18667489017",                  ItemType:"Gun", Rarity:"Ancient"},
+    {key:"FireGun",              ItemName:"Fire Gun",               Image:"rbxassetid://18654724137",                  ItemType:"Gun", Rarity:"Mythic"},
+    {key:"SciFiGun",             ItemName:"SciFi Gun",              Image:"rbxassetid://18654720054",                  ItemType:"Gun", Rarity:"Mythic"},
+    {key:"SafariSniper",         ItemName:"Safari Sniper",          Image:"rbxassetid://18654720579",                  ItemType:"Gun", Rarity:"Mythic"},
+    {key:"ToxicGun",             ItemName:"Toxic Gun",              Image:"rbxassetid://18654718906",                  ItemType:"Gun", Rarity:"Mythic"},
+    {key:"DragonAR",             ItemName:"Dragon AR",              Image:"rbxassetid://18654777203",                  ItemType:"Gun", Rarity:"Mythic"},
+    {key:"DragonTailGun",        ItemName:"Dragon Tail Gun",        Image:"rbxassetid://18654724495",                  ItemType:"Gun", Rarity:"Mythic"},
+    {key:"JapanGun",             ItemName:"Japan Gun",              Image:"rbxassetid://18654721590",                  ItemType:"Gun", Rarity:"Legendary"},
+    {key:"FlameThrowerDragon",   ItemName:"Flame Thrower Dragon",   Image:"rbxassetid://18667460297",                  ItemType:"Gun", Rarity:"Mythic"},
+    {key:"DoubleBarrelJapaneseGun",ItemName:"Double Barrel Japanese Gun",Image:"rbxassetid://18654726016",             ItemType:"Gun", Rarity:"Mythic"},
+    {key:"CircusGun",            ItemName:"Circus Gun",             Image:"rbxassetid://18654726948",                  ItemType:"Gun", Rarity:"Rare"},
+    {key:"ScaleBarrelGun",       ItemName:"Scale Barrel Gun",       Image:"rbxassetid://18654720300",                  ItemType:"Gun", Rarity:"Mythic"},
+    {key:"FireWorkGun",          ItemName:"Firework Gun",           Image:"rbxassetid://18654723661",                  ItemType:"Gun", Rarity:"Mythic"},
+    {key:"KatanaPistol",         ItemName:"Katana Pistol",          Image:"rbxassetid://18654720850",                  ItemType:"Gun", Rarity:"Mythic"},
+    {key:"CrossBow",             ItemName:"CrossBow",               Image:"rbxassetid://18654726687",                  ItemType:"Gun", Rarity:"Mythic"},
+    {key:"JapanesePistol",       ItemName:"Japanese Pistol",        Image:"rbxassetid://18654721954",                  ItemType:"Gun", Rarity:"Mythic"},
+    {key:"DragonLauncher",       ItemName:"Dragon Launcher",        Image:"rbxassetid://18668353729",                  ItemType:"Gun", Rarity:"Mythic"},
+    {key:"PumpkinCanon",         ItemName:"Pumpkin Canon",          Image:"rbxassetid://108199682555035",              ItemType:"Gun", Rarity:"Mythic"},
+    {key:"PumpkinCrowCanon",     ItemName:"Pumpkin Crow Canon",     Image:"rbxassetid://131336500372460",              ItemType:"Gun", Rarity:"Mythic"},
+    {key:"CandyDistributor",     ItemName:"Candy Distributor",      Image:"rbxassetid://123401503139565",              ItemType:"Gun", Rarity:"Mythic"},
+    {key:"MagicSniper",          ItemName:"Magic Sniper",           Image:"rbxassetid://78654953078977",               ItemType:"Gun", Rarity:"Mythic"},
+    {key:"RainbowHandgun",       ItemName:"Rainbow Gun",            Image:"rbxassetid://18504126050",                  ItemType:"Gun", Rarity:"Mythic"},
+    {key:"HarponGun",            ItemName:"Harpon Gun",             Image:"rbxassetid://18504117099",                  ItemType:"Gun", Rarity:"Rare"},
+    {key:"WaterGun",             ItemName:"Water Gun",              Image:"rbxassetid://18520070798",                  ItemType:"Gun", Rarity:"Rare"},
+    {key:"DoubleCannon",         ItemName:"Double Cannon",          Image:"rbxassetid://18504113709",                  ItemType:"Gun", Rarity:"Rare"},
+    {key:"BopGun",               ItemName:"Bop Gun",                Image:"rbxassetid://18504112543",                  ItemType:"Gun", Rarity:"Rare"},
+    {key:"FleshShooter",         ItemName:"Flesh Shooter",          Image:"rbxassetid://78584505083424",               ItemType:"Gun", Rarity:"Rare"},
+    {key:"SkullGun",             ItemName:"Skull Gun",              Image:"rbxassetid://18504123544",                  ItemType:"Gun", Rarity:"Legendary"},
+    {key:"DragonGun",            ItemName:"Dragon Gun",             Image:"rbxassetid://18654725412",                  ItemType:"Gun", Rarity:"Ancient"},
+    {key:"SolarbiteGun",         ItemName:"Solarbite Gun",          Image:"rbxassetid://102406305565692",              ItemType:"Gun", Rarity:"Ancient"},
+    {key:"AbyssalGun",           ItemName:"Abyssal Gun",            Image:"rbxassetid://76568305006194",               ItemType:"Gun", Rarity:"Ancient"},
+    {key:"AbyssalSniper",        ItemName:"Abyssal Sniper",         Image:"rbxassetid://109017291529005",              ItemType:"Gun", Rarity:"Ancient"},
+    {key:"Seagun",               ItemName:"Sea Gun",                Image:"rbxassetid://18504121341",                  ItemType:"Gun", Rarity:"Common"},
+    {key:"SharkGun",             ItemName:"Shark Gun",              Image:"rbxassetid://18504122065",                  ItemType:"Gun", Rarity:"Common"},
+    {key:"SoundGun",             ItemName:"Sound Gun",              Image:"rbxassetid://18504125494",                  ItemType:"Gun", Rarity:"Common"},
+    {key:"Injection",            ItemName:"Injection Gun",          Image:"rbxassetid://18504117364",                  ItemType:"Gun", Rarity:"Common"},
+    {key:"NailGun",              ItemName:"Nail Gun",               Image:"rbxassetid://18504118424",                  ItemType:"Gun", Rarity:"Common"},
+    {key:"FlintGun",             ItemName:"Flint Gun",              Image:"rbxassetid://18504114977",                  ItemType:"Gun", Rarity:"Common"},
+    {key:"FlareGun",             ItemName:"Flare Gun",              Image:"rbxassetid://18504114720",                  ItemType:"Gun", Rarity:"Common"},
+    {key:"DoubleBarrel",         ItemName:"Double Barrel",          Image:"rbxassetid://18504113435",                  ItemType:"Gun", Rarity:"Common"},
+    {key:"BarrelGun",            ItemName:"Barrel Gun",             Image:"rbxassetid://18504129343",                  ItemType:"Gun", Rarity:"Common"},
+    {key:"BroomStick",           ItemName:"Broom Stick",            Image:"rbxassetid://138273784545937",              ItemType:"Gun", Rarity:"Common"},
+    {key:"WitchPistol",          ItemName:"Witch Pistol",           Image:"rbxassetid://94120955045183",               ItemType:"Gun", Rarity:"Common"},
+    {key:"PumpkinLatte",         ItemName:"Pumpkin Latte",          Image:"rbxassetid://102105112053184",              ItemType:"Gun", Rarity:"Common"},
+    {key:"RibsGun",              ItemName:"Ribs Gun",               Image:"rbxassetid://121991712492285",              ItemType:"Gun", Rarity:"Common"},
+
+    // ── EFFECTS ─────────────────────────────────────────────────────────────
+    {key:"DefaultEffect", ItemName:"Default Effect",  Image:"rbxassetid://84777154787719",  ItemType:"Effect", Rarity:"Common"},
+    {key:"Batstorm",      ItemName:"Batstorm",         Image:"rbxassetid://92947313623851",  ItemType:"Effect", Rarity:"Common"},
+    {key:"SoulReaper",    ItemName:"Soul Reaper",      Image:"rbxassetid://139488326961899", ItemType:"Effect", Rarity:"Common"},
+    {key:"PumpkinCurse",  ItemName:"Pumpkin Curse",    Image:"rbxassetid://119276342573957", ItemType:"Effect", Rarity:"Common"},
+    {key:"Ghosted",       ItemName:"Ghosted",           Image:"rbxassetid://85372258717724",  ItemType:"Effect", Rarity:"Common"},
+    {key:"Frostbite",     ItemName:"Frostbite",         Image:"rbxassetid://96237284722724",  ItemType:"Effect", Rarity:"Mythic"},
+    {key:"CandyCane",     ItemName:"Candy Cane",        Image:"rbxassetid://105160670763202", ItemType:"Effect", Rarity:"Rare"},
+    {key:"Decorated",     ItemName:"Decorated",         Image:"rbxassetid://126996456069513", ItemType:"Effect", Rarity:"Uncommon"},
+    {key:"Gifted",        ItemName:"Gifted",            Image:"rbxassetid://73654149552603",  ItemType:"Effect", Rarity:"Legendary"},
+    {key:"SantaClaus",    ItemName:"Santa",             Image:"rbxassetid://135085444847867", ItemType:"Effect", Rarity:"Rare"},
+    {key:"Freeze",        ItemName:"Freeze",            Image:"rbxassetid://73353943790875",  ItemType:"Effect", Rarity:"Uncommon"},
+    {key:"SnowMan",       ItemName:"SnowMan",           Image:"rbxassetid://122576698317333", ItemType:"Effect", Rarity:"Rare"},
+    {key:"Confetti",      ItemName:"Confetti",          Image:"rbxassetid://108505632837799", ItemType:"Effect", Rarity:"Mythic"},
+    {key:"Heartache",     ItemName:"Heartache",         Image:"rbxassetid://84840525397695",  ItemType:"Effect", Rarity:"Ancient"},
+    {key:"LoveExplosion", ItemName:"Love Explosion",    Image:"rbxassetid://98786428621798",  ItemType:"Effect", Rarity:"Mythic"},
+    {key:"Featherlight",  ItemName:"Featherlight",      Image:"rbxassetid://136984323983320", ItemType:"Effect", Rarity:"Rare"},
+    {key:"Heartbeat",     ItemName:"Heartbeat",         Image:"rbxassetid://140350269884652", ItemType:"Effect", Rarity:"Mythic"}
+  ];
+
+  // ─── Helpers ───────────────────────────────────────────────────────────────
+  const THUMB_CACHE = new Map();
+
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+  }
+  function valueOf(r) { return RARITY_VALUE[r] ?? 0; }
+  function unique(a) { return [...new Set(a)]; }
+  function chunk(arr, size) {
+    const out = [];
+    for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
+    return out;
+  }
+
+  function extractAssetId(imageStr) {
+    if (!imageStr) return null;
+    const s = String(imageStr);
+    const q = s.match(/[?&]id=(\d{5,})/i);
+    if (q) return q[1];
+    const d = s.match(/rbxassetid:\/\/\s*(\d{5,})/i);
+    if (d) return d[1];
+    const a = s.match(/(\d{5,})/);
+    return a ? a[1] : null;
+  }
+
+  async function fetchThumbnailsForIds(assetIds) {
+    const ids = [...new Set(assetIds.filter(Boolean).map(String))].filter(id => !THUMB_CACHE.has(id));
+    if (!ids.length) return;
+    for (const batch of chunk(ids, 100)) {
+      const robloxUrl = `https://thumbnails.roblox.com/v1/assets?assetIds=${encodeURIComponent(batch.join(','))}&size=${THUMB_SIZE}&format=${THUMB_FORMAT}&isCircular=${THUMB_CIRCULAR}`;
+      const url = `https://corsproxy.io/?${encodeURIComponent(robloxUrl)}`;
+      try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(res.status);
+        const json = await res.json();
+        if (json && Array.isArray(json.data)) {
+          for (const row of json.data) {
+            const id = String(row.targetId);
+            THUMB_CACHE.set(id, (row.state === 'Completed' && row.imageUrl) ? row.imageUrl : null);
+          }
+        } else {
+          batch.forEach(id => THUMB_CACHE.set(String(id), null));
+        }
+      } catch (e) {
+        batch.forEach(id => THUMB_CACHE.set(String(id), null));
+      }
+    }
+  }
+
+  // ─── DOM refs ──────────────────────────────────────────────────────────────
+  const elGrid  = document.getElementById('grid');
+  const elQ     = document.getElementById('q');
+  const elType  = document.getElementById('type');
+  const elRarity= document.getElementById('rarity');
+  const elSort  = document.getElementById('sort');
+  const elReset = document.getElementById('reset');
+  const elDense = document.getElementById('toggleDense');
+  const elShown = document.getElementById('shownCount');
+  const elTotal = document.getElementById('totalCount');
+  const elSum   = document.getElementById('sumValue');
+  const elAvg   = document.getElementById('avgValue');
+
+  // ─── Filters ───────────────────────────────────────────────────────────────
+  function applyFilters() {
+    const q      = elQ.value.trim().toLowerCase();
+    const type   = elType.value;
+    const rarity = elRarity.value;
+    let rows = ITEMS.map(it => ({ ...it, assetId: extractAssetId(it.Image), value: valueOf(it.Rarity) }));
+    if (type !== 'all')   rows = rows.filter(x => x.ItemType === type);
+    if (rarity !== 'all') rows = rows.filter(x => x.Rarity === rarity);
+    if (q) rows = rows.filter(x => `${x.ItemName} ${x.ItemType} ${x.Rarity} ${x.key}`.toLowerCase().includes(q));
+    const s = elSort.value;
+    if (s === 'value_asc')  rows.sort((a,b) => a.value - b.value || a.ItemName.localeCompare(b.ItemName));
+    else if (s === 'value_desc') rows.sort((a,b) => b.value - a.value || a.ItemName.localeCompare(b.ItemName));
+    else if (s === 'name_desc')  rows.sort((a,b) => b.ItemName.localeCompare(a.ItemName));
+    else if (s === 'type_asc')   rows.sort((a,b) => a.ItemType.localeCompare(b.ItemType) || b.value - a.value);
+    else rows.sort((a,b) => a.ItemName.localeCompare(b.ItemName));
+    return rows;
+  }
+
+  // ─── Card template ─────────────────────────────────────────────────────────
+  function cardHTML(item) {
+    const rColor = RARITY_COLOR[item.Rarity] || 'rgba(255,255,255,.4)';
+    const rGlow  = RARITY_GLOW[item.Rarity]  || 'rgba(255,255,255,.15)';
+    const assetId = item.assetId ? String(item.assetId) : '';
+    const thumbUrl = assetId ? (THUMB_CACHE.get(assetId) || '') : '';
+
+    const imgBlock = thumbUrl
+      ? `<img
+           alt="${esc(item.ItemName)}"
+           src="${esc(thumbUrl)}"
+           loading="lazy"
+           onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"
+         /><div class="fallback" style="display:none">
+           <div class="fallback-icon">🔍</div>
+           <div>Preview unavailable</div>
+           <div style="opacity:.6;font-size:10px">id: ${esc(assetId)}</div>
+         </div>`
+      : `<div class="fallback">
+           <div class="fallback-icon">${assetId ? '⏳' : '❌'}</div>
+           <div>${assetId ? 'Loading…' : 'No assetId'}</div>
+           ${assetId ? `<div style="opacity:.6;font-size:10px">id: ${esc(assetId)}</div>` : ''}
+         </div>`;
+
+    return `<div class="card"
+        data-assetid="${esc(assetId)}"
+        style="--rarity-color:${rColor};--rarity-glow:${rGlow}">
+      <div class="rarity-stripe"></div>
+      <div class="thumb">${imgBlock}</div>
+      <div class="body">
+        <div class="name">${esc(item.ItemName)}</div>
+        <div class="meta">
+          <span class="tag">${esc(item.ItemType)}</span>
+          <span class="tag rarity-tag">${esc(item.Rarity)}</span>
+          <span class="tag key-tag">${esc(item.key)}</span>
+        </div>
+        <div class="value">
+          <div class="value-left">
+            <div class="label">Value</div>
+            <div class="price">${item.value}</div>
+          </div>
+          <div class="value-right">rarity-based</div>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  // ─── Render ────────────────────────────────────────────────────────────────
+  async function render() {
+    const rows = applyFilters();
+
+    if (!rows.length) {
+      elGrid.innerHTML = `<div class="empty">
+        <div class="empty-icon">🔍</div>
+        No items match your filters.
+      </div>`;
+    } else {
+      elGrid.innerHTML = rows.map(cardHTML).join('');
+    }
+
+    const sum = rows.reduce((a, x) => a + (x.value || 0), 0);
+    const avg = rows.length ? Math.round(sum / rows.length) : 0;
+    elShown.textContent = String(rows.length);
+    elSum.textContent   = String(sum);
+    elAvg.textContent   = String(avg);
+
+    // Fetch thumbnails
+    const idsToFetch = rows.map(r => r.assetId).filter(Boolean);
+    await fetchThumbnailsForIds(idsToFetch);
+
+    // Update cards with loaded thumbnails
+    document.querySelectorAll('.card[data-assetid]').forEach(card => {
+      const id = card.getAttribute('data-assetid');
+      if (!id) return;
+      const url = THUMB_CACHE.get(id);
+      const img = card.querySelector('.thumb img');
+      const fb  = card.querySelector('.thumb .fallback');
+      if (!img && !fb) return;
+
+      if (url) {
+        if (img) {
+          img.src = url;
+          img.style.display = '';
+        } else {
+          // img wasn't in DOM yet (was fallback-only) → insert it
+          const newImg = document.createElement('img');
+          newImg.alt = card.querySelector('.name')?.textContent || '';
+          newImg.src = url;
+          newImg.loading = 'lazy';
+          newImg.onerror = function() {
+            this.style.display = 'none';
+            if (fb) fb.style.display = 'flex';
+          };
+          card.querySelector('.thumb').prepend(newImg);
+        }
+        if (fb) fb.style.display = 'none';
+      } else {
+        if (img) img.style.display = 'none';
+        if (fb) {
+          fb.style.display = 'flex';
+          fb.innerHTML = `<div class="fallback-icon">❌</div><div>Preview unavailable</div><div style="opacity:.6;font-size:10px">id: ${esc(id)}</div>`;
+        }
+      }
+    });
+  }
+
+  // ─── Rarity filter & legend build ─────────────────────────────────────────
+  const rarities = unique(ITEMS.map(x => x.Rarity)).sort((a,b) => valueOf(a) - valueOf(b));
+  for (const r of rarities) {
+    const opt = document.createElement('option');
+    opt.value = r;
+    opt.textContent = `${r} · ${valueOf(r)} pts`;
+    elRarity.appendChild(opt);
+  }
+
+  const legend = document.getElementById('rarityLegend');
+  for (const r of rarities) {
+    const pill = document.createElement('div');
+    pill.className = 'pill';
+    const dot = document.createElement('span');
+    dot.className = 'dot';
+    dot.style.background = RARITY_COLOR[r] || 'rgba(255,255,255,.4)';
+    dot.style.boxShadow = `0 0 6px ${RARITY_COLOR[r] || 'transparent'}`;
+    const t = document.createElement('span');
+    t.textContent = `${r}: ${valueOf(r)}`;
+    pill.appendChild(dot);
+    pill.appendChild(t);
+    legend.appendChild(pill);
+  }
+
+  elTotal.textContent = String(ITEMS.length);
+
+  // ─── Events ────────────────────────────────────────────────────────────────
+  elQ.addEventListener('input', render);
+  elType.addEventListener('change', render);
+  elRarity.addEventListener('change', render);
+  elSort.addEventListener('change', render);
+
+  elReset.addEventListener('click', () => {
+    elQ.value = '';
+    elType.value = 'all';
+    elRarity.value = 'all';
+    elSort.value = 'value_desc';
+    render();
+  });
+
+  let dense = false;
+  elDense.addEventListener('click', () => {
+    dense = !dense;
+    document.documentElement.style.setProperty('--thumb-h', dense ? '130px' : '220px');
+    document.body.classList.toggle('dense', dense);
+    elDense.textContent = dense ? 'Normal' : 'Compact';
+  });
+
+  // ─── Init ──────────────────────────────────────────────────────────────────
+  render();
+</script>
+</body>
+</html>
+
